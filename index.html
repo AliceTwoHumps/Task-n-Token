@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Task Tracker ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#ffd1e8; --pink-deep:#ff9ecd; --lav:#e0c3fc; --sky:#b8e4ff;
+    --mint:#c3ffe8; --yellow:#fff5c3; --ink:#7a5a86; --ink-soft:#a487b3;
+    --card:#fffafd; --shadow:0 8px 24px rgba(255,158,205,.28);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Comfortaa',cursive; color:var(--ink);
+    background:linear-gradient(135deg,#ffe3f3 0%,#e7d6ff 35%,#d6ecff 70%,#d6fff0 100%);
+    background-attachment:fixed; min-height:100vh; padding-bottom:60px;
+  }
+  h1,h2,h3{font-family:'Baloo 2',cursive; margin:0;}
+  .wrap{max-width:1100px; margin:0 auto; padding:20px;}
+
+  /* Header */
+  header{text-align:center; padding:26px 10px 10px;}
+  header h1{font-size:2.6rem; color:#ff7ab8; text-shadow:2px 2px 0 #fff, 4px 4px 0 rgba(224,195,252,.6);}
+  header p{color:var(--ink-soft); margin:6px 0 0;}
+
+  /* Dashboard */
+  .dash{display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin:20px 0;}
+  .stat{
+    background:var(--card); border-radius:24px; padding:16px 22px; min-width:140px;
+    text-align:center; box-shadow:var(--shadow); border:2px solid #ffe0f0;
+  }
+  .stat .num{font-family:'Baloo 2'; font-size:1.9rem; color:#ff7ab8;}
+  .stat .lbl{font-size:.78rem; color:var(--ink-soft); letter-spacing:.5px;}
+  .balance{background:linear-gradient(135deg,var(--pink),var(--lav)); border:none;}
+  .balance2{background:linear-gradient(315deg,var(--mint),var(--lav)); border:none;}
+  .balance .num{color:#fff; text-shadow:1px 1px 2px rgba(122,90,134,.4); font-size:2.3rem;}
+  .balance .lbl{color:#fff;}
+  .balance2 .num{color:#fff; text-shadow:1px 1px 2px rgba(122,90,134,.4); font-size:2.3rem;}
+  .balance2 .lbl{color:#fff;}
+
+  /* Toolbar */
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:14px 0 6px;}
+  .btn{
+    font-family:'Baloo 2'; font-size:.95rem; border:none; cursor:pointer;
+    padding:11px 20px; border-radius:30px; color:#8a4e78; transition:.2s;
+    background:linear-gradient(135deg,#ffe0f0,#ffd1e8); box-shadow:0 4px 12px rgba(255,158,205,.35);
+  }
+  .btn:hover{transform:translateY(-2px) scale(1.03); box-shadow:0 7px 16px rgba(255,158,205,.5);}
+  .btn:active{transform:scale(.97);}
+  .btn.sky{background:linear-gradient(135deg,#d6ecff,#b8e4ff);}
+  .btn.mint{background:linear-gradient(135deg,#d6fff0,#c3ffe8);}
+  .btn.lav{background:linear-gradient(135deg,#efe3ff,#e0c3fc);}
+  .gh-row{display:flex; gap:8px; justify-content:center; margin:8px 0 4px; flex-wrap:wrap;}
+  .gh-row input{
+    font-family:'Comfortaa'; border:2px solid #ffd1e8; border-radius:24px; padding:9px 16px;
+    width:min(520px,80vw); outline:none; color:var(--ink); background:#fff;
+  }
+
+  /* Tabs */
+  .tabs{display:flex; gap:8px; justify-content:center; margin:22px 0 14px;}
+  .tab{
+    font-family:'Baloo 2'; cursor:pointer; padding:9px 26px; border-radius:30px;
+    background:rgba(255,255,255,.55); color:var(--ink-soft); border:2px solid transparent;
+  }
+  .tab.on{background:#fff; color:#ff7ab8; border-color:#ffd1e8; box-shadow:var(--shadow);}
+
+  /* Search/filter */
+  .filters{display:flex; gap:10px; justify-content:center; margin-bottom:16px; flex-wrap:wrap;}
+  .filters input,.filters select{
+    font-family:'Comfortaa'; border:2px solid #ffd1e8; border-radius:24px; padding:9px 16px;
+    outline:none; color:var(--ink); background:#fff;
+  }
+
+  /* Cards grid */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px;}
+  .card{
+    background:var(--card); border-radius:22px; padding:16px; box-shadow:var(--shadow);
+    border:2px solid #ffe6f3; display:flex; flex-direction:column; gap:8px; position:relative;
+    transition:.2s;
+  }
+  .card:hover{transform:translateY(-3px);}
+  .card .cat{font-size:.72rem; color:#fff; background:var(--pink-deep); align-self:flex-start;
+    padding:3px 12px; border-radius:20px;}
+  .card.rw .cat{background:#b89bff;}
+  .card h3{font-size:1.15rem; color:#8a4e78;}
+  .card .desc{font-size:.82rem; color:var(--ink-soft); flex:1;}
+  .card .foot{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .value{font-family:'Baloo 2'; font-size:1.1rem; color:#ff7ab8;}
+  .count{font-size:.72rem; color:var(--ink-soft);}
+  .do-btn{font-family:'Baloo 2'; border:none; cursor:pointer; padding:8px 16px; border-radius:20px;
+    color:#8a4e78; background:linear-gradient(135deg,#c3ffe8,#a0f5d3); transition:.15s;}
+  .do-btn:hover{transform:scale(1.05);}
+  .do-btn.redeem{background:linear-gradient(135deg,#e0c3fc,#c9a3ff);}
+  .do-btn:disabled{filter:grayscale(.7); opacity:.5; cursor:not-allowed; transform:none;}
+
+  /* Activity feed */
+  .feed{max-width:640px; margin:0 auto;}
+  .feed-item{background:var(--card); border-radius:18px; padding:12px 18px; margin-bottom:10px;
+    box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:center;}
+  .feed-item.earn{border-left:6px solid #a0f5d3;}
+  .feed-item.spend{border-left:6px solid #c9a3ff;}
+  .feed-item .when{font-size:.72rem; color:var(--ink-soft);}
+  .empty{text-align:center; color:var(--ink-soft); padding:40px; font-size:1rem;}
+
+  /* Add form */
+  .adder{background:var(--card); border-radius:22px; padding:14px; margin-bottom:18px;
+    box-shadow:var(--shadow); display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center;}
+  .adder input{font-family:'Comfortaa'; border:2px solid #ffd1e8; border-radius:20px; padding:8px 14px;
+    outline:none; color:var(--ink);}
+
+  /* Toast + confetti */
+  #toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(120px);
+    background:#fff; color:#ff7ab8; font-family:'Baloo 2'; padding:14px 26px; border-radius:30px;
+    box-shadow:var(--shadow); transition:.4s; z-index:50; border:2px solid #ffd1e8;}
+  #toast.show{transform:translateX(-50%) translateY(0);}
+  .sparkle{position:fixed; pointer-events:none; font-size:1.4rem; z-index:60; animation:floatUp 1s ease-out forwards;}
+  @keyframes floatUp{0%{opacity:1; transform:translateY(0) scale(.5);}100%{opacity:0; transform:translateY(-120px) scale(1.4);}}
+
+  footer{text-align:center; color:var(--ink-soft); font-size:.78rem; margin-top:30px;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🌸 Task Tracker 🌸</h1>
+    <p>🌷 complete good girl tasks · earn cutie tokens · redeem yummy rewards 🌷</p>
+  </header>
+
+  <!-- Dashboard -->
+  <div class="dash">
+    <div class="stat balance"><div class="num" id="s-balance">0</div><div class="lbl">TOKEN BALANCE</div></div>
+    <div class="stat balance2"><div class="num" id="s-earned">0</div><div class="lbl">TOTAL EARNED</div></div>
+    <div class="stat balance"><div class="num" id="s-spent">0</div><div class="lbl">TOTAL SPENT</div></div>
+    <div class="stat balance2"><div class="num" id="s-tasks">0</div><div class="lbl">TASKS DONE</div></div>
+    <div class="stat balance"><div class="num" id="s-rewards">0</div><div class="lbl">REWARDS</div></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="gh-row">
+    <input id="ghUrl" placeholder="🔗 GitHub raw CSV URL (https://raw.githubusercontent.com/…)">
+    <button class="btn sky" onclick="loadFromGitHub()">☁️ Load from GitHub</button>
+  </div>
+  <div class="toolbar">
+    <label class="btn mint">📂 Import CSV<input type="file" accept=".csv" onchange="importFile(event)" hidden></label>
+    <button class="btn" onclick="exportCSV()">💾 Download Updated CSV</button>
+    <button class="btn lav" onclick="copyForGitHub()">📋 Copy CSV for GitHub</button>
+    <button class="btn" onclick="resetAll()" style="background:linear-gradient(135deg,#ffdede,#ffc0c0)">🔄 Reset</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab on" data-tab="tasks" onclick="switchTab('tasks')">📝 Tasks</div>
+    <div class="tab" data-tab="rewards" onclick="switchTab('rewards')">🎁 Rewards</div>
+    <div class="tab" data-tab="activity" onclick="switchTab('activity')">📜 Activity</div>
+  </div>
+
+  <!-- TASKS -->
+  <section id="tab-tasks">
+    <div class="adder">
+      <input id="nt-name" placeholder="Task name">
+      <input id="nt-cat" placeholder="Category">
+      <input id="nt-val" type="number" placeholder="Tokens" style="width:98px">
+      <button class="btn mint" onclick="addTask()">➕ Add Task</button>
+    </div>
+    <div class="filters">
+      <input id="task-search" placeholder="🔍 Search tasks…" oninput="render()">
+      <select id="task-cat" onchange="render()"><option value="">All categories</option></select>
+    </div>
+    <div class="grid" id="tasks-grid"></div>
+  </section>
+
+  <!-- REWARDS -->
+  <section id="tab-rewards" class="hidden">
+    <div class="adder">
+      <input id="nr-name" placeholder="Reward name">
+      <input id="nr-cat" placeholder="Category">
+      <input id="nr-cost" type="number" placeholder="Cost" style="width:90px">
+      <button class="btn lav" onclick="addReward()">➕ Add Reward</button>
+    </div>
+    <div class="filters">
+      <input id="reward-search" placeholder="🔍 Search rewards…" oninput="render()">
+      <select id="reward-cat" onchange="render()"><option value="">All categories</option></select>
+    </div>
+    <div class="grid" id="rewards-grid"></div>
+  </section>
+
+  <!-- ACTIVITY -->
+  <section id="tab-activity" class="hidden">
+    <div class="feed" id="feed"></div>
+  </section>
+
+  <footer>🩷</footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============ STATE ============ */
+let state = { tasks:[], rewards:[], completions:[], redemptions:[] };
+const LS_KEY = 'yumeTaskTracker';
+
+/* ============ CSV PARSER (robust, quote-aware) ============ */
+function parseCSV(text){
+  const rows=[]; let row=[], cur='', inQ=false;
+  text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; }
+      else cur+=c;
+    } else {
+      if(c==='"') inQ=true;
+      else if(c===','){ row.push(cur); cur=''; }
+      else if(c==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; }
+      else cur+=c;
+    }
+  }
+  if(cur!==''||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r=>r.length>1 || (r[0]&&r[0].trim()!==''));
+}
+function csvEscape(v){
+  v=(v===undefined||v===null)?'':String(v);
+  return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+}
+
+/* ============ IMPORT / EXPORT ============ */
+const HEADER=['type','id','name','description','category','token_value','token_cost','timestamp','count'];
+
+function loadCSVText(text){
+  try{
+    const rows=parseCSV(text);
+    if(!rows.length) throw new Error('empty');
+    const start = rows[0][0].toLowerCase().trim()==='type' ? 1 : 0;
+    const fresh={tasks:[],rewards:[],completions:[],redemptions:[]};
+    for(let i=start;i<rows.length;i++){
+      const [type,id,name,desc,cat,val,cost,ts]=rows[i].map(x=>x?x.trim():'');
+      if(!type) continue;
+      switch(type.toLowerCase()){
+        case 'task': fresh.tasks.push({id,name,description:desc,category:cat||'General',value:+val||0}); break;
+        case 'reward': fresh.rewards.push({id,name,description:desc,category:cat||'General',cost:+cost||0}); break;
+        case 'completion': fresh.completions.push({id,timestamp:ts}); break;
+        case 'redemption': fresh.redemptions.push({id,timestamp:ts}); break;
+      }
+    }
+    state=fresh; save(); render();
+    toast(`✨ Imported ${state.tasks.length} tasks & ${state.rewards.length} rewards!`);
+  }catch(e){ toast('😿 Could not read that CSV: '+e.message); }
+}
+
+function importFile(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>loadCSVText(r.result);
+  r.readAsText(f); ev.target.value='';
+}
+
+async function loadFromGitHub(){
+  const url=document.getElementById('ghUrl').value.trim();
+  if(!url){ toast('☁️ Paste a GitHub raw CSV URL first!'); return; }
+  localStorage.setItem('yumeGhUrl',url);
+  toast('☁️ Fetching from GitHub…');
+  try{
+    const res=await fetch(url,{cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    loadCSVText(await res.text());
+  }catch(e){ toast('😿 GitHub fetch failed: '+e.message); }
+}
+
+function buildCSV(){
+  const lines=[HEADER.join(',')];
+  state.tasks.forEach(t=>lines.push(['task',t.id,t.name,t.description,t.category,t.value,'','',''].map(csvEscape).join(',')));
+  state.rewards.forEach(r=>lines.push(['reward',r.id,r.name,r.description,r.category,'',r.cost,'',''].map(csvEscape).join(',')));
+  state.completions.forEach(c=>lines.push(['completion',c.id,'','','','','',c.timestamp,''].map(csvEscape).join(',')));
+  state.redemptions.forEach(r=>lines.push(['redemption',r.id,'','','','','',r.timestamp,''].map(csvEscape).join(',')));
+  return lines.join('\n');
+}
+
+function exportCSV(){
+  const blob=new Blob([buildCSV()],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='yume-tasks.csv'; a.click();
+  toast('💾 CSV downloaded! Commit it to GitHub 🩷');
+}
+function copyForGitHub(){
+  navigator.clipboard.writeText(buildCSV())
+    .then(()=>toast('📋 CSV copied! Paste into your GitHub file ✨'))
+    .catch(()=>toast('😿 Copy failed – use Download instead'));
+}
+
+/* ============ ACTIONS ============ */
+function balance(){ return earned()-spent(); }
+function earned(){ return state.completions.reduce((s,c)=>s+(taskById(c.id)?.value||0),0); }
+function spent(){ return state.redemptions.reduce((s,r)=>s+(rewardById(r.id)?.cost||0),0); }
+function taskById(id){ return state.tasks.find(t=>t.id===id); }
+function rewardById(id){ return state.rewards.find(r=>r.id===id); }
+function taskCount(id){ return state.completions.filter(c=>c.id===id).length; }
+function rewardCount(id){ return state.redemptions.filter(r=>r.id===id).length; }
+
+function completeTask(id,ev){
+  state.completions.push({id,timestamp:new Date().toISOString()});
+  save(); render(); sparkle(ev,'⭐'); toast(`+${taskById(id).value} tokens! ✨ ${taskById(id).name}`);
+}
+function redeemReward(id,ev){
+  const rw=rewardById(id);
+  if(balance()<rw.cost){ toast('😿 Not enough tokens yet!'); return; }
+  state.redemptions.push({id,timestamp:new Date().toISOString()});
+  save(); render(); sparkle(ev,'🎁'); toast(`🎉 Redeemed ${rw.name}! -${rw.cost} tokens`);
+}
+
+function newId(prefix,arr){
+  let n=1; while(arr.some(x=>x.id===prefix+String(n).padStart(3,'0'))) n++;
+  return prefix+String(n).padStart(3,'0');
+}
+function addTask(){
+  const name=document.getElementById('nt-name').value.trim();
+  const val=+document.getElementById('nt-val').value;
+  if(!name||!val){ toast('💭 Enter a name and token value'); return; }
+  state.tasks.push({id:newId('T',state.tasks),name,description:'',category:document.getElementById('nt-cat').value.trim()||'General',value:val});
+  document.getElementById('nt-name').value=''; document.getElementById('nt-cat').value=''; document.getElementById('nt-val').value='';
+  save(); render(); toast('➕ Task added!');
+}
+function addReward(){
+  const name=document.getElementById('nr-name').value.trim();
+  const cost=+document.getElementById('nr-cost').value;
+  if(!name||!cost){ toast('💭 Enter a name and cost'); return; }
+  state.rewards.push({id:newId('R',state.rewards),name,description:'',category:document.getElementById('nr-cat').value.trim()||'General',cost});
+  document.getElementById('nr-name').value=''; document.getElementById('nr-cat').value=''; document.getElementById('nr-cost').value='';
+  save(); render(); toast('➕ Reward added!');
+}
+
+/* ============ RENDER ============ */
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
+  ['tasks','rewards','activity'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('hidden',x!==t));
+}
+
+function fillCats(sel,arr){
+  const cur=sel.value;
+  const cats=[...new Set(arr.map(x=>x.category))].sort();
+  sel.innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option>${c}</option>`).join('');
+  sel.value=cur;
+}
+
+function render(){
+  // stats
+  document.getElementById('s-balance').textContent=balance();
+  document.getElementById('s-earned').textContent=earned();
+  document.getElementById('s-spent').textContent=spent();
+  document.getElementById('s-tasks').textContent=state.completions.length;
+  document.getElementById('s-rewards').textContent=state.redemptions.length;
+
+  // tasks
+  fillCats(document.getElementById('task-cat'),state.tasks);
+  const tq=document.getElementById('task-search').value.toLowerCase();
+  const tc=document.getElementById('task-cat').value;
+  const tg=document.getElementById('tasks-grid');
+  const tasks=state.tasks.filter(t=>(!tq||t.name.toLowerCase().includes(tq))&&(!tc||t.category===tc));
+  tg.innerHTML=tasks.length?tasks.map(t=>`
+    <div class="card">
+      <span class="cat">${esc(t.category)}</span>
+      <h3>${esc(t.name)}</h3>
+      <div class="desc">${esc(t.description||'')}</div>
+      <div class="foot">
+        <span class="value">⭐ ${t.value}</span>
+        <span class="count">done ${taskCount(t.id)}×</span>
+        <button class="do-btn" onclick="completeTask('${t.id}',event)">Done ✓</button>
+      </div>
+    </div>`).join(''):'<div class="empty">🌸 No tasks yet – add one or import a CSV!</div>';
+
+  // rewards
+  fillCats(document.getElementById('reward-cat'),state.rewards);
+  const rq=document.getElementById('reward-search').value.toLowerCase();
+  const rc=document.getElementById('reward-cat').value;
+  const rg=document.getElementById('rewards-grid');
+  const bal=balance();
+  const rewards=state.rewards.filter(r=>(!rq||r.name.toLowerCase().includes(rq))&&(!rc||r.category===rc));
+  rg.innerHTML=rewards.length?rewards.map(r=>`
+    <div class="card rw">
+      <span class="cat">${esc(r.category)}</span>
+      <h3>${esc(r.name)}</h3>
+      <div class="desc">${esc(r.description||'')}</div>
+      <div class="foot">
+        <span class="value">🎁 ${r.cost}</span>
+        <span class="count">got ${rewardCount(r.id)}×</span>
+        <button class="do-btn redeem" ${bal<r.cost?'disabled':''} onclick="redeemReward('${r.id}',event)">Redeem</button>
+      </div>
+    </div>`).join(''):'<div class="empty">🎀 No rewards yet – add one or import a CSV!</div>';
+
+  // activity feed
+  const acts=[
+    ...state.completions.map(c=>({t:'earn',ts:c.timestamp,txt:'Completed '+(taskById(c.id)?.name||c.id),amt:'+'+(taskById(c.id)?.value||0)})),
+    ...state.redemptions.map(r=>({t:'spend',ts:r.timestamp,txt:'Redeemed '+(rewardById(r.id)?.name||r.id),amt:'-'+(rewardById(r.id)?.cost||0)}))
+  ].sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  const feed=document.getElementById('feed');
+  feed.innerHTML=acts.length?acts.map(a=>`
+    <div class="feed-item ${a.t}">
+      <div><div>${a.t==='earn'?'⭐':'🎁'} ${esc(a.txt)}</div><div class="when">${fmt(a.ts)}</div></div>
+      <div class="value">${a.amt}</div>
+    </div>`).join(''):'<div class="empty">📜 No activity yet – complete a task to begin! ✨</div>';
+}
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fmt(ts){const d=new Date(ts); return isNaN(d)?ts:d.toLocaleString();}
+
+function save(){ localStorage.setItem(LS_KEY,JSON.stringify(state)); }
+function resetAll(){
+  if(confirm('Reset ALL progress? Export your CSV first if you want to keep it! 🩷')){
+    localStorage.removeItem(LS_KEY); state={tasks:[],rewards:[],completions:[],redemptions:[]};
+    loadSample(); toast('🔄 Reset to sample data');
+  }
+}
+
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+function sparkle(ev,emoji){
+  const emojis=[emoji,'✨','🌟','💖','🩷'];
+  const x=ev?ev.clientX:innerWidth/2, y=ev?ev.clientY:innerHeight/2;
+  for(let i=0;i<8;i++){
+    const s=document.createElement('div'); s.className='sparkle'; s.textContent=emojis[i%emojis.length];
+    s.style.left=(x+(Math.random()*80-40))+'px'; s.style.top=(y+(Math.random()*40-20))+'px';
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1000);
+  }
+}
+
+function loadSample(){
+  state={
+    tasks:[
+      {id:'T001',name:'Wear prescribed Outfit',description:'Cover that 🐱',category:'Good Girl',value:0.5},
+      {id:'T002',name:'Masturbate - Fingers',description:'Hydrate that 🐱',category:'Health',value:0.5},
+      {id:'T003',name:'Complete a Smut Novel',description:'Girl Education 📚',category:'Study',value:5},
+      {id:'T004',name:'Naked Yoga 30 minutes',description:'Time to stretch 🧘🏻‍♀️',category:'Health',value:3},
+      {id:'T005',name:'No Panties',description:'Wiping 🐱 only after toilet',category:'Good Girl',value:1},
+      {id:'T006',name:'Masturbate - Dildo',description:'Stretch that 🐱',category:'Health',value:2},
+      {id:'T007',name:'Research Porn - Find Ideas',description:'Share ideas even if embarrassing',category:'Study',value:2},
+      {id:'T008',name:'Naked Yoga Exposure',description:'Stretch in front of window🧘🏻‍♀️',category:'Health',value:5},
+      {id:'T009',name:'Enema',description:'Clean that 🍑',category:'Good Girl',value:5},
+      {id:'T010',name:'Masturbate - Vibrator',description:'Buzz that 🐱',category:'Health',value:2},
+      {id:'T011',name:'Oral Training',description:'Practice dick sucking 10 min',category:'Study',value:2},
+      {id:'T012',name:'Shave Pussy',description:'Keep it smooth',category:'Health',value:1},
+      {id:'T013',name:'Anal Dilators',description:'Stretch and prepare 🍑',category:'Good Girl',value:2},
+      {id:'T014',name:'Masturbate - Remote Vibrator',description:'Surprise buzz that 🐱',category:'Health',value:3},
+      {id:'T015',name:'Oral Training - Deep Throat',description:'Practice deep throat',category:'Study',value:5},
+      {id:'T016',name:'Anal Dildo',description:'Stretch 🍑',category:'Good Girl',value:15},
+      {id:'T017',name:'Chastity',description:'Lock that 🐱 2 Days',category:'Good Girl',value:25},
+      {id:'T018',name:'Masturbate - Sybian',description:'Blast that 🐱',category:'Health',value:10},
+      {id:'T019',name:'Anal snake',description:'Find out how deep is deep',category:'Study',value:10},
+      {id:'T020',name:'Grind pussy on object',description:'Table corner etc ',category:'Kinky',value:10},
+      {id:'T021',name:'Outdoors Pee only day',description:'Peeing outside only',category:'Kinky',value:50},
+      {id:'T022',name:'Winnie the Pooh Outing',description:'No bottoms 1km',category:'Kinky',value:100},
+      {id:'T023',name:'Blow Job and Swallow',description:'Eat those swimmers',category:'Kinky',value:50},
+      {id:'T024',name:'Backyard Naked Yoga',description:'Stretch in public 🧘🏻‍♀️',category:'Kinky',value:50},
+      {id:'T025',name:'Update Phone Wallpaper',description:'🐱🍑',category:'Kinky',value:50},
+      {id:'T026',name:'Complete Gym Session Toe Show',description:'Remind everyone 🐱 is there',category:'Kinky',value:100},
+      {id:'T027',name:'Gym Shower',description:'No locking the door',category:'Kinky',value:100},
+      {id:'T028',name:'Pool Change Room',description:'Accidentally use the mens room',category:'Kinky',value:100},
+      {id:'T029',name:'Cake for Cake',description:'Sit on a cake',category:'Kinky',value:20}
+    ],
+    rewards:[
+      {id:'R001',name:'St Andrews Cross',description:'Toy Collection',category:'Toy Collection',cost:10000},
+      {id:'R002',name:'Brazilian Waxing',description:'💳 70',category:'Good Girl',cost:1000},
+      {id:'R003',name:'Anal Toy',description:'Brutus Depth Trainer',category:'Toy Collection',cost:1000},
+      {id:'R004',name:'Pussy Tamer',description:'Creature Cocks Golden Mamba Silicone Dildo',category:'Toy Collection',cost:1000}
+    ],
+    completions:[], redemptions:[]
+  };
+  save(); render();
+}
+
+(function init(){
+  const saved=localStorage.getItem(LS_KEY);
+  if(saved){ try{ state=JSON.parse(saved); }catch(e){ loadSample(); return render(); } render(); }
+  else loadSample();
+  const gh=localStorage.getItem('yumeGhUrl'); if(gh) document.getElementById('ghUrl').value=gh;
+})();
+</script>
+</body>
+</html>
